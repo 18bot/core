@@ -30,12 +30,12 @@ if(APPLE)
 
 	# copy the build to the unity assets folder
 	add_custom_command(TARGET hexbot POST_BUILD
-	    COMMAND cp -R "${CORE_OUTPUT_DIR}/" "${ROOT_DIR}/unity/Assets/Plugins"
+	    COMMAND test -d "${ROOT_DIR}/unity" || cp -R "${CORE_OUTPUT_DIR}/" "${ROOT_DIR}/unity/Assets/Plugins"
 	)
 
 	# copy the build to the probably built unity application
 	add_custom_command(TARGET hexbot POST_BUILD
-	    COMMAND cp -R "${CORE_OUTPUT_DIR}/" "${OUTPUT_DIR}/hexbot.app/Contents/Plugins"
+	    COMMAND test -d "${OUTPUT_DIR}/hexbot.app" ||cp -R "${CORE_OUTPUT_DIR}/" "${OUTPUT_DIR}/hexbot.app/Contents/Plugins"
 	)
 
 else()
