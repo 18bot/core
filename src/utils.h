@@ -14,5 +14,6 @@
 #include <list>
 
 #include "json/value.h"
+#include "json/reader.h"
 
 #endif /* utils_h */

@@ -6,6 +6,7 @@
 
 HexbotPtr Hexbot::s_instance = nullptr;
 
+const std::shared_ptr<Json::CharReader> Hexbot::CharReader = std::shared_ptr<Json::CharReader>(Json::CharReaderBuilder().newCharReader());
 
 int Hexbot::Create(
     const std::string& contentsDirectory,

@@ -14,10 +14,11 @@ Animation::Animation(const std::string& filename)
     std::ifstream t(filename);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     
+    std::string errors;
     Json::Value root;
-    if (!Json::Reader().parse(str, root))
+    if (!Hexbot::CharReader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
     {
-        std::cerr << "Failed to load animation " << filename << std::endl;
+        std::cerr << "Failed to load animation group " << filename << ": " << errors << std::endl;
         abort();
     }
     
@@ -199,10 +200,11 @@ AnimationGroup::AnimationGroup(const std::string& filename)
     std::ifstream t(filename);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     
+    std::string errors;
     Json::Value root;
-    if (!Json::Reader().parse(str, root))
+    if (!Hexbot::CharReader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
     {
-        std::cerr << "Failed to load animation group " << filename << std::endl;
+        std::cerr << "Failed to load animation group " << filename << ": " << errors << std::endl;
         abort();
     }
     

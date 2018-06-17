@@ -11,6 +11,7 @@ typedef std::shared_ptr<class Hexbot> HexbotPtr;
 class Hexbot
 {
     public:
+        static const std::shared_ptr<Json::CharReader> CharReader;
         static const HexbotPtr& getInstance() { return s_instance; }
     
     public:
