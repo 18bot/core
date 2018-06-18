@@ -42,10 +42,16 @@ else()
 	add_library(hexbot SHARED ${HEXBOT_SRC})
 
 	set_target_properties(hexbot PROPERTIES 
-		LIBRARY_OUTPUT_DIRECTORY "${CORE_OUTPUT_DIR}"
-		LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CORE_OUTPUT_DIR}"
-		LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CORE_OUTPUT_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY "${CORE_OUTPUT_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CORE_OUTPUT_DIR}"
+		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CORE_OUTPUT_DIR}"
 	)
+
+	# copy the build to the unity assets folder
+	add_custom_command(TARGET hexbot POST_BUILD
+	    COMMAND ${CMAKE_COMMAND} -E copy "${CORE_OUTPUT_DIR}/hexbot.dll" "${ROOT_DIR}/unity/Assets/Plugins/hexbot.dll"
+	)
+
 endif()
 
 target_link_libraries(hexbot jsoncpp_lib_static)
