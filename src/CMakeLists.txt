@@ -47,11 +47,20 @@ else()
 		RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CORE_OUTPUT_DIR}"
 	)
 
+	get_filename_component(CORE_OUTPUT_FLATTER "${CORE_OUTPUT_DIR}" ABSOLUTE)
+
+	get_filename_component(TARGET_A "${ROOT_DIR}/unity/Assets/Plugins/hexbot.dll" ABSOLUTE)
+	get_filename_component(TARGET_B "${OUTPUT_DIR}/hexbot/hexbot_Data/Plugins/hexbot.dll" ABSOLUTE)
+
 	# copy the build to the unity assets folder
 	add_custom_command(TARGET hexbot POST_BUILD
-	    COMMAND ${CMAKE_COMMAND} -E copy "${CORE_OUTPUT_DIR}/hexbot.dll" "${ROOT_DIR}/unity/Assets/Plugins/hexbot.dll"
+	    COMMAND ${CMAKE_COMMAND} -E copy "${CORE_OUTPUT_FLATTER}/hexbot.dll" "${TARGET_A}"
 	)
 
+	# copy the build to the probably built unity application
+	add_custom_command(TARGET hexbot POST_BUILD
+	    COMMAND ${CMAKE_COMMAND} -E copy "${CORE_OUTPUT_FLATTER}/hexbot.dll" "${TARGET_B}"
+	)
 endif()
 
 target_link_libraries(hexbot jsoncpp_lib_static)

@@ -14,7 +14,7 @@ namespace api
 };
 
 #ifdef WIN32
-#define SPEC_API __declspec(dllexport)
+#define SPEC_API extern "C" __declspec(dllexport)
 #else
 #define SPEC_API  
 #endif
