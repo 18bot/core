@@ -10,8 +10,7 @@ file(GLOB HEXBOT_SRC
     "*.cpp"
 )
 
-add_compile_options(-std=c++11)
-include_directories(hexbot "../external/jsoncpp/include")
+include_directories(hexbot "${CMAKE_CURRENT_SOURCE_DIR}/../external/jsoncpp/include")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../external/jsoncpp" "jsoncpp")
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")

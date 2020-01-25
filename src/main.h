@@ -15,24 +15,15 @@ class Hexbot
         static const HexbotPtr& getInstance() { return s_instance; }
     
     public:
-        typedef std::function< void(int width, int height, int dataLength, void* data)> SnapshotCallback;
-    
-    public:
         static int Create(
             const std::string& contentsDirectory,
             api::LogCallback logCallback,
-            api::GetGyroscopeDataCallback getGyroscopeDataCallback,
-            api::GetAccelerometerDataCallback getAccelerometerDataCallback,
-            api::MoveServoCallback moveServoCallback,
-            api::RequestCameraSnapshotCallback requestCameraSnapshotCallback);
+            api::MoveServoCallback moveServoCallback);
     
         Hexbot(
             const std::string& contentsDirectory,
             api::LogCallback logCallback,
-            api::GetGyroscopeDataCallback getGyroscopeDataCallback,
-            api::GetAccelerometerDataCallback getAccelerometerDataCallback,
-            api::MoveServoCallback moveServoCallback,
-            api::RequestCameraSnapshotCallback requestCameraSnapshotCallback);
+            api::MoveServoCallback moveServoCallback);
     
         void update(float dt);
         void cameraSnapshot(int width, int height, int dataLength, void* data);
@@ -42,10 +33,7 @@ class Hexbot
     
     public:
         void log(const std::string& data);
-        bool getGyroscopeData(float& x, float& y, float& z);
-        bool getAccelerometerData(float& x, float& y, float& z);
         bool moveServo(int servo, float angle, float time);
-        bool requestCameraSnapshot(SnapshotCallback callback);
     
         const AnimationPlayer& getPlayer() const { return m_player; }
         AnimationPlayer& getPlayer() { return m_player; }
@@ -59,12 +47,7 @@ class Hexbot
     
         std::string m_contentsDirectory;
         api::LogCallback m_logCallback;
-        api::GetGyroscopeDataCallback m_getGyroscopeDataCallback;
-        api::GetAccelerometerDataCallback m_getAccelerometerDataCallback;
         api::MoveServoCallback m_moveServoCallback;
-        api::RequestCameraSnapshotCallback m_requestCameraSnapshotCallback;
-    
-        SnapshotCallback m_currentSnapshotCallback;
     
         AnimationPtr m_forwardAnimation;
         AnimationGroupPtr m_forwardAnimationGroup;
