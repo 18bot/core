@@ -14,7 +14,7 @@ int RoboInit(
     );
 }
 
-void RoboUpdate(float dt)
+void RoboUpdate(uint32_t dt)
 {
     Hexbot::getInstance()->update(dt);
 }

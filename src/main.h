@@ -25,7 +25,7 @@ class Hexbot
             api::LogCallback logCallback,
             api::MoveServoCallback moveServoCallback);
     
-        void update(float dt);
+        void update(uint32_t dt);
         void cameraSnapshot(int width, int height, int dataLength, void* data);
     
         int randomInt(int a, int b);
@@ -33,7 +33,7 @@ class Hexbot
     
     public:
         void log(const std::string& data);
-        bool moveServo(int servo, float angle, float time);
+        bool moveServo(int servo, float angle, uint32_t time);
     
         const AnimationPlayer& getPlayer() const { return m_player; }
         AnimationPlayer& getPlayer() { return m_player; }

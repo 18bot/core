@@ -3,11 +3,12 @@
 #define HEXBOT_API
 
 // callbacks
+#include <cstdint>
 
 namespace api
 {
     typedef void (*LogCallback) (const char*);
-    typedef bool (*MoveServoCallback) (int servo, float angle, float time);
+    typedef bool (*MoveServoCallback) (int servo, float angle, uint32_t time);
 };
 
 #ifdef WIN32
@@ -26,7 +27,7 @@ extern "C"
         api::MoveServoCallback moveServoCallback
     );
     
-	SPEC_API void RoboUpdate(float dt);
+	SPEC_API void RoboUpdate(uint32_t dt);
 }
 
 #endif

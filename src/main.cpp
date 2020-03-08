@@ -24,7 +24,7 @@ void Hexbot::log(const std::string& data)
     m_logCallback(data.c_str());
 }
 
-bool Hexbot::moveServo(int servo, float angle, float time)
+bool Hexbot::moveServo(int servo, float angle, uint32_t time)
 {
     return m_moveServoCallback(servo, angle, time);
 }
@@ -41,7 +41,7 @@ float Hexbot::randomFloat(float a, float b)
     return randomFloat(m_randomGen);
 }
 
-void Hexbot::update(float dt)
+void Hexbot::update(uint32_t dt)
 {
     m_player.update(dt);
 }
