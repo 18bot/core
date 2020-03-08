@@ -2,3 +2,4 @@
 /projects/mac
 /projects/win
 .idea
+/src/cmake-build-*
