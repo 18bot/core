@@ -11,7 +11,6 @@ typedef std::shared_ptr<class Hexbot> HexbotPtr;
 class Hexbot
 {
     public:
-        static const std::shared_ptr<Json::CharReader> CharReader;
         static const HexbotPtr& getInstance() { return s_instance; }
     
     public:
@@ -33,7 +32,6 @@ class Hexbot
     
     public:
         void log(const std::string& data);
-        bool moveServo(int servo, float angle, uint32_t time);
     
         const AnimationPlayer& getPlayer() const { return m_player; }
         AnimationPlayer& getPlayer() { return m_player; }
@@ -47,11 +45,10 @@ class Hexbot
     
         std::string m_contentsDirectory;
         api::LogCallback m_logCallback;
-        api::MoveServoCallback m_moveServoCallback;
     
         AnimationPtr m_forwardAnimation;
-        AnimationGroupPtr m_forwardAnimationGroup;
-    
+        PlayerBindingsPtr m_playerBindings;
+
         AnimationPlayer m_player;
 };
 

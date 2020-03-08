@@ -2,57 +2,10 @@
 #include "animation.h"
 #include "json/reader.h"
 #include "utils.h"
-#include "main.h"
 
-
-Animation::AnimationSet::AnimationSet(const Json::Value& data)
-{
-    read(data);
-}
-
-void Animation::AnimationSet::read(const Json::Value& data)
-{
-    const Json::Value& bindings = data["bindings"];
-    m_bindings.reserve(bindings.size());
-    for (const auto& binding : bindings)
-    {
-        m_bindings.push_back(binding.asString());
-    }
-    m_length = data["length"].asFloat();
-
-    const Json::Value& frames = data["frames"];
-    for (Json::ValueConstIterator it = frames.begin(); it != frames.end(); it++)
-    {
-        m_frames.emplace_back(*it);
-    }
-}
-
-Animation::AnimationSetPlay::AnimationSetPlay(const Animation& animation, const Json::Value& data) :
-    m_set(nullptr)
-{
-    read(animation, data);
-}
-
-void Animation::AnimationSetPlay::read(const Animation& animation, const Json::Value& data)
-{
-    m_position = data["position"].asFloat();
-
-    auto set = animation.getSets().find(data["set"].asString());
-    if (set == animation.getSets().end())
-    {
-        throw std::runtime_error("Set was not found");
-    }
-
-    m_set = &set->second;
-
-    const Json::Value& bindings = data["bindings"];
-    for (Json::ValueConstIterator it = bindings.begin(); it != bindings.end(); it++)
-    {
-        m_bindings.emplace(std::piecewise_construct,
-            std::forward_as_tuple(it.name()),
-            std::forward_as_tuple(it->asString()));
-    }
-}
+#include "animation_frame.h"
+#include "animation_set.h"
+#include "animation_char.h"
 
 AnimationPtr Animation::Create(const std::string& filename)
 {
@@ -63,15 +16,15 @@ Animation::Animation(const std::string& filename)
 {
     std::ifstream t(filename);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-    
+
     std::string errors;
     Json::Value root;
-    if (!Hexbot::CharReader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
+    if (!JSONCharReader::Reader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
     {
         std::cerr << "Failed to load animation group " << filename << ": " << errors << std::endl;
         abort();
     }
-    
+
     read(root);
 }
 
@@ -95,7 +48,7 @@ void Animation::read(const Json::Value& data)
     }
 }
 
-Animation::BoundFrame& Animation::findBoundFrame(Animation::BoundFrames& frames, uint32_t time)
+BoundFrame& Animation::findBoundFrame(BoundFrames& frames, uint32_t time)
 {
     const auto& f = std::find_if(frames.begin(), frames.end(), [time](const BoundFrame& it)
     {
@@ -104,7 +57,7 @@ Animation::BoundFrame& Animation::findBoundFrame(Animation::BoundFrames& frames,
 
     if (f == frames.end())
     {
-        for (Animation::BoundFrames::const_iterator it = frames.begin(); it != frames.end(); it++)
+        for (BoundFrames::const_iterator it = frames.begin(); it != frames.end(); it++)
         {
             if (it->getPosition() > time)
             {
@@ -120,7 +73,7 @@ Animation::BoundFrame& Animation::findBoundFrame(Animation::BoundFrames& frames,
     return *f;
 }
 
-Animation::BoundFrames Animation::generateFrames() const
+BoundFrames Animation::generateFrames() const
 {
     BoundFrames frames;
 
@@ -133,7 +86,7 @@ Animation::BoundFrames Animation::generateFrames() const
             {
                 position -= m_length;
             }
-            Animation::BoundFrame& boundFrame = findBoundFrame(frames, position);
+            BoundFrame& boundFrame = findBoundFrame(frames, position);
             boundFrame.assign(frame, play.getBindings());
         }
     };
@@ -141,67 +94,29 @@ Animation::BoundFrames Animation::generateFrames() const
     return std::move(frames);
 }
 
-AnimationInstancePtr Animation::newInstance(bool autoPlay)
+AnimationInstancePtr Animation::newInstance(api::MoveServoCallback moveCallback,
+    const PlayerBindingsPtr& bindings, bool autoPlay)
 {
-    return AnimationInstance::Create(shared_from_this(), autoPlay);
+    return AnimationInstance::Create(moveCallback, shared_from_this(), bindings, autoPlay);
 }
 
 // ------------------
 
-void Animation::BoundFrame::assign(
-    const Animation::AnimationFrame& frame,
-    const std::map<std::string, std::string>& bindings)
+AnimationInstancePtr AnimationInstance::Create(
+    api::MoveServoCallback moveCallback,
+    const AnimationPtr& animation,
+    const PlayerBindingsPtr& bindings,
+    bool autoPlay)
 {
-    for (const auto& binding: frame.getMoves())
-    {
-        const auto& boundMove = bindings.find(binding.first);
-        if (boundMove == bindings.end())
-        {
-            throw std::runtime_error("No bindings");
-        }
-
-        m_moves.emplace(std::piecewise_construct,
-            std::forward_as_tuple(boundMove->second),
-            std::forward_as_tuple(binding.second));
-    }
-}
-// ------------------
-
-Animation::AnimationFrame::AnimationFrame(const Json::Value& data)
-{
-    read(data);
+    return AnimationInstancePtr(new AnimationInstance(
+        moveCallback, animation, bindings, autoPlay));
 }
 
-void Animation::AnimationFrame::read(const Json::Value& data)
-{
-    m_position = data["position"].asUInt();
-    
-    const Json::Value& moves = data["moves"];
-    
-    for (Json::ValueConstIterator it = moves.begin(); it != moves.end(); it++)
-    {
-        std::string name = it.name();
-        
-        const Json::Value& at = *it;
-        
-        int angle = at[0].asInt();
-        uint32_t time = at[1].asUInt();
-    
-        m_moves.emplace(std::piecewise_construct,
-          std::forward_as_tuple(name),
-          std::forward_as_tuple(angle, time));
-    }
-}
-
-// ------------------
-
-AnimationInstancePtr AnimationInstance::Create(const AnimationPtr& animation, bool autoPlay)
-{
-    return AnimationInstancePtr(new AnimationInstance(animation, autoPlay));
-}
-
-AnimationInstance::AnimationInstance(const AnimationPtr& animation, bool autoPlay) :
+AnimationInstance::AnimationInstance(api::MoveServoCallback moveCallback, const AnimationPtr& animation,
+        const PlayerBindingsPtr& bindings, bool autoPlay) :
+    m_moveCallback(moveCallback),
     m_time(0),
+    m_bindings(bindings),
     m_animation(animation),
     m_frames(animation->generateFrames()),
     m_currentFrame(m_frames.begin()),
@@ -232,36 +147,23 @@ void AnimationInstance::stop()
     m_active = false;
 }
 
-void AnimationInstance::bind(const std::string& name, int servo, float coef, int offset)
+void AnimationInstance::activateFrame(const BoundFrame& frame) const
 {
-    m_bindings.emplace(std::piecewise_construct,
-        std::forward_as_tuple(name),
-        std::forward_as_tuple(servo, coef, offset));
-}
+    const BoundFrame::FrameMoves& moves = frame.getMoves();
 
-void AnimationInstance::bind(const Bindings& bindings)
-{
-    m_bindings = bindings;
-}
-
-void AnimationInstance::activateFrame(const Animation::BoundFrame& frame) const
-{
-    const HexbotPtr& hexbot = Hexbot::getInstance();
-
-    const Animation::BoundFrame::FrameMoves& moves = frame.getMoves();
     for (auto it = moves.begin(); it != moves.end(); it++)
     {
         const auto& frame = it->second;
         const std::string& name = it->first;
         
-        auto bit = m_bindings.find(name);
-        if (bit == m_bindings.end())
+        auto bit = m_bindings->getBindings().find(name);
+        if (bit == m_bindings->getBindings().end())
             continue;
         int servo = bit->second.servo;
         float coef = bit->second.coef;
         float offset = bit->second.offset;
 
-        hexbot->moveServo(servo, ((float)std::get<0>(frame) * coef) + offset, std::get<1>(frame));
+        m_moveCallback(servo, ((float)std::get<0>(frame) * coef) + offset, std::get<1>(frame));
     }
 }
 
@@ -300,20 +202,13 @@ bool AnimationInstance::update(uint32_t dt)
 // ------------------
 
 
-AnimationGroupPtr AnimationGroup::Create(const std::string& filename)
+PlayerBindingsPtr PlayerBindings::Create(const std::string& filename)
 {
-    return AnimationGroupPtr(new AnimationGroup(filename));
+    return PlayerBindingsPtr(new PlayerBindings(filename));
 }
 
-AnimationGroup::Track::Track(const Json::Value& data)
+void PlayerBindings::read(const Json::Value& data)
 {
-    read(data);
-}
-
-void AnimationGroup::Track::read(const Json::Value& data)
-{
-    m_delay = data["delay"].asFloat();
-    
     const Json::Value& bindings = data["bindings"];
     
     for (Json::ValueConstIterator it = bindings.begin(); it != bindings.end(); it++)
@@ -330,14 +225,14 @@ void AnimationGroup::Track::read(const Json::Value& data)
     }
 }
 
-AnimationGroup::AnimationGroup(const std::string& filename)
+PlayerBindings::PlayerBindings(const std::string& filename)
 {
     std::ifstream t(filename);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
     
     std::string errors;
     Json::Value root;
-    if (!Hexbot::CharReader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
+    if (!JSONCharReader::Reader->parse(str.c_str(), str.c_str() + str.size(), &root, &errors))
     {
         std::cerr << "Failed to load animation group " << filename << ": " << errors << std::endl;
         abort();
@@ -345,27 +240,6 @@ AnimationGroup::AnimationGroup(const std::string& filename)
     
     read(root);
 }
-    
-void AnimationGroup::play(const AnimationPtr& animation, AnimationPlayer& player)
-{
-    for (Tracks::const_iterator it = m_tracks.begin(); it != m_tracks.end(); it++)
-    {
-        int index = it - m_tracks.begin();
-        
-        player.setTrack(index, animation, it->getDelay(), it->getBindings());
-    }
-}
-
-void AnimationGroup::read(const Json::Value& data)
-{
-    const Json::Value& tracks = data["tracks"];
-    
-    for (Json::ValueConstIterator it = tracks.begin(); it != tracks.end(); it++)
-    {
-        m_tracks.emplace_back(*it);
-    }
-}
-
 
 // ------------------
 
@@ -384,16 +258,19 @@ void AnimationPlayer::update(uint32_t dt)
     }
 }
 
+AnimationPlayer::AnimationPlayer(api::MoveServoCallback moveCallback) :
+    m_moveCallback(moveCallback)
+{
+}
+
 void AnimationPlayer::setTrack(int track, const AnimationInstancePtr& instance)
 {
     m_tracks[track] = instance;
 }
 
-void AnimationPlayer::setTrack(int track, const AnimationPtr& animation, float delay, const AnimationInstance::Bindings& bindings)
+void AnimationPlayer::setTrack(int track, const AnimationPtr& animation, float delay, const PlayerBindingsPtr& bindings)
 {
-    const AnimationInstancePtr& instance = animation->newInstance();
-    instance->bind(bindings);
+    const AnimationInstancePtr& instance = animation->newInstance(m_moveCallback, bindings);
     instance->restart(delay);
-    
     setTrack(track, instance);
 }

@@ -4,12 +4,7 @@
 
 // callbacks
 #include <cstdint>
-
-namespace api
-{
-    typedef void (*LogCallback) (const char*);
-    typedef bool (*MoveServoCallback) (int servo, float angle, uint32_t time);
-};
+#include "callbacks.h"
 
 #ifdef WIN32
 #define SPEC_API extern "C" __declspec(dllexport)

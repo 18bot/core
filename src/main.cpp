@@ -1,12 +1,8 @@
 
-#include <stdio.h>
-
 #include "main.h"
 #include "animation.h"
 
 HexbotPtr Hexbot::s_instance = nullptr;
-
-const std::shared_ptr<Json::CharReader> Hexbot::CharReader = std::shared_ptr<Json::CharReader>(Json::CharReaderBuilder().newCharReader());
 
 int Hexbot::Create(
     const std::string& contentsDirectory,
@@ -14,19 +10,12 @@ int Hexbot::Create(
     api::MoveServoCallback moveServoCallback)
 {
     s_instance = std::make_shared<Hexbot>(contentsDirectory, logCallback, moveServoCallback);
-    
     return 1;
-    
 }
 
 void Hexbot::log(const std::string& data)
 {
     m_logCallback(data.c_str());
-}
-
-bool Hexbot::moveServo(int servo, float angle, uint32_t time)
-{
-    return m_moveServoCallback(servo, angle, time);
 }
 
 int Hexbot::randomInt(int a, int b)
@@ -54,12 +43,12 @@ Hexbot::Hexbot(
 
     m_contentsDirectory(contentsDirectory),
     m_logCallback(logCallback),
-    m_moveServoCallback(moveServoCallback)
+    m_player(moveServoCallback)
 {
     m_forwardAnimation = Animation::Create(m_contentsDirectory + "/forward.json");
-    
-    m_forwardAnimationGroup = AnimationGroup::Create(m_contentsDirectory + "/forward-group.json");
-    m_forwardAnimationGroup->play(m_forwardAnimation, m_player);
+    m_playerBindings = PlayerBindings::Create(m_contentsDirectory + "/bindings.json");
+
+    m_player.setTrack(0, m_forwardAnimation, 0, m_playerBindings);
     
     log("Hexbot Core Initialized!");
 }
