@@ -23,6 +23,18 @@ extern "C"
     );
     
 	SPEC_API void RoboUpdate(uint32_t dt);
+
+	enum MovementState
+    {
+	    MOVE_Stop = 0,
+        MOVE_Forward,
+        MOVE_Backward,
+        MOVE_Left,
+        MOVE_Right,
+        MOVE_Sit
+    };
+
+    SPEC_API void RoboMove(MovementState state);
 }
 
 #endif

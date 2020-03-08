@@ -18,3 +18,8 @@ void RoboUpdate(uint32_t dt)
 {
     Hexbot::getInstance()->update(dt);
 }
+
+void RoboMove(MovementState state)
+{
+    Hexbot::getInstance()->move(state);
+}

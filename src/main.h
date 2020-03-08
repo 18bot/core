@@ -26,6 +26,8 @@ class Hexbot
     
         void update(uint32_t dt);
         void cameraSnapshot(int width, int height, int dataLength, void* data);
+
+        void move(MovementState state);
     
         int randomInt(int a, int b);
         float randomFloat(float a, float b);
@@ -45,10 +47,15 @@ class Hexbot
     
         std::string m_contentsDirectory;
         api::LogCallback m_logCallback;
-    
-        AnimationPtr m_forwardAnimation;
-        PlayerBindingsPtr m_playerBindings;
 
+        AnimationPtr m_forwardAnimation;
+        AnimationPtr m_backwardAnimation;
+        AnimationPtr m_leftAnimation;
+        AnimationPtr m_rightAnimation;
+        AnimationPtr m_stayAnimation;
+        AnimationPtr m_sitAnimation;
+
+        PlayerBindingsPtr m_playerBindings;
         AnimationPlayer m_player;
 };
 
