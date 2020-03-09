@@ -1,5 +1,6 @@
 
 #include "animation_frame.h"
+#include <stdexcept>
 
 AnimationFrame::AnimationFrame(const Json::Value& data)
 {

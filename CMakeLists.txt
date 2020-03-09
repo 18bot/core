@@ -7,14 +7,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(JSONCPP_WITH_TESTS "OFF" CACHE STRING "Do not need that.")
 
 file(GLOB HEXBOT_SRC
-    "*.h"
-    "*.cpp"
+    "src/*.h"
+    "src/*.cpp"
 )
 
-include_directories(hexbot "${CMAKE_CURRENT_SOURCE_DIR}/../external/jsoncpp/include")
-add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../external/jsoncpp" "jsoncpp")
+include_directories(hexbot "external/jsoncpp/include")
+add_subdirectory("external/jsoncpp" "jsoncpp")
 
-set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
+set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(OUTPUT_DIR "${ROOT_DIR}/bin")
 set(CORE_OUTPUT_DIR "${OUTPUT_DIR}/core")
 

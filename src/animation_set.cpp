@@ -14,7 +14,7 @@ void AnimationSet::read(const Json::Value& data)
     {
         m_bindings.push_back(binding.asString());
     }
-    m_length = data["length"].asFloat();
+    m_length = data["length"].asUInt();
 
     const Json::Value& frames = data["frames"];
     for (Json::ValueConstIterator it = frames.begin(); it != frames.end(); it++)
@@ -31,7 +31,7 @@ AnimationSetPlay::AnimationSetPlay(const Animation& animation, const Json::Value
 
 void AnimationSetPlay::read(const Animation& animation, const Json::Value& data)
 {
-    m_position = data["position"].asFloat();
+    m_position = data["position"].asUInt();
 
     auto set = animation.getSets().find(data["set"].asString());
     if (set == animation.getSets().end())
