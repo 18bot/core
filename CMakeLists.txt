@@ -12,25 +12,31 @@ file(GLOB HEXBOT_SRC
 )
 
 include_directories(hexbot "external/jsoncpp/include")
-add_subdirectory("external/jsoncpp" "jsoncpp")
+add_subdirectory(external/jsoncpp)
 
 set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(OUTPUT_DIR "${ROOT_DIR}/bin")
 set(CORE_OUTPUT_DIR "${OUTPUT_DIR}/core")
 
-add_library(hexbot SHARED ${HEXBOT_SRC})
+if(HEXBOT_STATIC)
+	add_definitions(-DHEXBOT_STATIC)
+	add_library(hexbot STATIC ${HEXBOT_SRC})
+else()
+	add_library(hexbot SHARED ${HEXBOT_SRC})
+
+	# copy the build to the unity assets folder
+	add_custom_command(TARGET hexbot POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hexbot> "${ROOT_DIR}/unity/Assets/Plugins"
+	)
+
+	# copy the build to the probably built unity application
+	add_custom_command(TARGET hexbot POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hexbot> "${OUTPUT_DIR}/hexbot/hexbot_Data/Plugins"
+	)
+
+endif()
 
 get_filename_component(CORE_OUTPUT_FLATTER "${CORE_OUTPUT_DIR}" ABSOLUTE)
-
-# copy the build to the unity assets folder
-add_custom_command(TARGET hexbot POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hexbot> "${ROOT_DIR}/unity/Assets/Plugins"
-)
-
-# copy the build to the probably built unity application
-add_custom_command(TARGET hexbot POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hexbot> "${OUTPUT_DIR}/hexbot/hexbot_Data/Plugins"
-)
 
 target_link_libraries(hexbot jsoncpp_lib_static)
 

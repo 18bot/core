@@ -6,10 +6,14 @@
 #include <cstdint>
 #include "callbacks.h"
 
-#ifdef WIN32
-#define SPEC_API extern "C" __declspec(dllexport)
+#ifdef HEXBOT_STATIC
+#   define SPEC_API
 #else
-#define SPEC_API  
+#   ifdef WIN32
+#   define SPEC_API extern "C" __declspec(dllexport)
+#   else
+#   define SPEC_API
+#   endif
 #endif
 
 // api itself
