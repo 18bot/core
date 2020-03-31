@@ -7,6 +7,8 @@
 #include "animation_set.h"
 #include "animation_char.h"
 
+#include <algorithm>
+
 AnimationPtr Animation::Create(const std::string& filename)
 {
     return AnimationPtr(new Animation(filename));

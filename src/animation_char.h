@@ -6,6 +6,7 @@
 #define HEXBOT_ANIMATION_CHAR_H
 
 #include "json/reader.h"
+#include <memory>
 
 class JSONCharReader
 {
