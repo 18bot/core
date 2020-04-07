@@ -21,5 +21,5 @@ void RoboUpdate(uint32_t dt)
 
 void RoboMove(MovementState state)
 {
-    Hexbot::getInstance()->move(state);
+    Hexbot::getInstance()->move(state, 1.f);
 }

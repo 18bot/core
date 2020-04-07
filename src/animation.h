@@ -63,7 +63,7 @@ private:
 public:
     bool update(uint32_t dt);
 
-    void restart(uint32_t delay = 0);
+    void restart(uint32_t delay = 0, float speed = 1);
     void start();
     void stop();
     
@@ -75,6 +75,7 @@ private:
 private:
     api::MoveServoCallback m_moveCallback;
     uint32_t m_time;
+    float m_speed;
     AnimationPtr m_animation;
     PlayerBindingsPtr m_bindings;
     BoundFrames m_frames;
@@ -121,7 +122,7 @@ public:
 
     void update(uint32_t dt);
     void setTrack(int track, const AnimationInstancePtr& instance);
-    void setTrack(int track, const AnimationPtr& animation, float delay, const PlayerBindingsPtr& bindings);
+    void setTrack(int track, const AnimationPtr& animation, float delay, float speed, const PlayerBindingsPtr& bindings);
     
 private:
     std::map<int, AnimationInstancePtr> m_tracks;

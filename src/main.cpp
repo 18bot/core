@@ -57,38 +57,38 @@ Hexbot::Hexbot(
     log("Hexbot Core Initialized!");
 }
 
-void Hexbot::move(MovementState state)
+void Hexbot::move(MovementState state, float speed)
 {
     switch (state)
     {
         case MOVE_Forward:
         {
-            m_player.setTrack(0, m_forwardAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_forwardAnimation, 0, speed, m_playerBindings);
             break;
         }
         case MOVE_Backward:
         {
-            m_player.setTrack(0, m_backwardAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_backwardAnimation, 0, speed, m_playerBindings);
             break;
         }
         case MOVE_Left:
         {
-            m_player.setTrack(0, m_leftAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_leftAnimation, 0, speed, m_playerBindings);
             break;
         }
         case MOVE_Right:
         {
-            m_player.setTrack(0, m_rightAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_rightAnimation, 0, speed, m_playerBindings);
             break;
         }
         case MOVE_Sit:
         {
-            m_player.setTrack(0, m_sitAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_sitAnimation, 0, speed, m_playerBindings);
             break;
         }
         default:
         {
-            m_player.setTrack(0, m_stayAnimation, 0, m_playerBindings);
+            m_player.setTrack(0, m_stayAnimation, 0, speed, m_playerBindings);
             break;
         }
     }

@@ -27,7 +27,7 @@ class Hexbot
         void update(uint32_t dt);
         void cameraSnapshot(int width, int height, int dataLength, void* data);
 
-        void move(MovementState state);
+        void move(MovementState state, float speed);
     
         int randomInt(int a, int b);
         float randomFloat(float a, float b);

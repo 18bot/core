@@ -118,6 +118,7 @@ AnimationInstance::AnimationInstance(api::MoveServoCallback moveCallback, const 
         const PlayerBindingsPtr& bindings, bool autoPlay) :
     m_moveCallback(moveCallback),
     m_time(0),
+    m_speed(1),
     m_bindings(bindings),
     m_animation(animation),
     m_frames(animation->generateFrames()),
@@ -129,13 +130,15 @@ AnimationInstance::AnimationInstance(api::MoveServoCallback moveCallback, const 
 void AnimationInstance::reset()
 {
     m_time = 0;
+    m_speed = 1;
     m_currentFrame = m_frames.begin();
 }
 
-void AnimationInstance::restart(uint32_t delay)
+void AnimationInstance::restart(uint32_t delay, float speed)
 {
     m_currentFrame = m_frames.begin();
     m_time = -delay;
+    m_speed = speed;
     m_active = true;
 }
 
@@ -165,7 +168,7 @@ void AnimationInstance::activateFrame(const BoundFrame& frame) const
         float coef = bit->second.coef;
         float offset = bit->second.offset;
 
-        m_moveCallback(servo, ((float)std::get<0>(frame) * coef) + offset, std::get<1>(frame));
+        m_moveCallback(servo, ((float)std::get<0>(frame) * coef) + offset, std::get<1>(frame) * m_speed);
     }
 }
 
@@ -174,7 +177,7 @@ bool AnimationInstance::update(uint32_t dt)
     if (!m_active)
         return false;
     
-    m_time += dt;
+    m_time += dt * m_speed;
     
     if (m_currentFrame != m_frames.end())
     {
@@ -270,9 +273,9 @@ void AnimationPlayer::setTrack(int track, const AnimationInstancePtr& instance)
     m_tracks[track] = instance;
 }
 
-void AnimationPlayer::setTrack(int track, const AnimationPtr& animation, float delay, const PlayerBindingsPtr& bindings)
+void AnimationPlayer::setTrack(int track, const AnimationPtr& animation, float delay, float speed, const PlayerBindingsPtr& bindings)
 {
     const AnimationInstancePtr& instance = animation->newInstance(m_moveCallback, bindings);
-    instance->restart(delay);
+    instance->restart(delay, speed);
     setTrack(track, instance);
 }
